@@ -1,7 +1,6 @@
 package reusablebytes
 
 import (
-	"math"
 	"sync"
 )
 
@@ -15,16 +14,18 @@ type BytesPool struct {
 	initSize  int32
 }
 
+const NewBytesLen = 128
+
 // Init 初始化池，initSize 是初始容量，maxSize 是最大容量
-func (p *BytesPool) Init(initSize int32) {
+func (p *BytesPool) Init(initSize, maxSize int32) {
 	p.pool = make([]*ReusableBytes, initSize)
 	p.usableInd = make([]int32, initSize)
 	for i := int32(0); i < initSize; i++ {
-		p.pool[i] = NewReusableBytes(64)
+		p.pool[i] = NewReusableBytes(NewBytesLen)
 		p.usableInd[i] = i
 	}
 	p.available = initSize
-	p.maxSize = math.MaxInt32
+	p.maxSize = maxSize
 	p.initSize = initSize
 	p.cond = sync.NewCond(&p.mu)
 }
@@ -46,10 +47,7 @@ func (p *BytesPool) Get() (*ReusableBytes, int32) {
 		// 可扩容
 		if int32(len(p.pool)) < p.maxSize {
 			newId := int32(len(p.pool))
-			newBuf := &ReusableBytes{
-				buffer: make([]byte, 64),
-				anchor: -1,
-			}
+			newBuf := NewReusableBytes(NewBytesLen)
 			p.pool = append(p.pool, newBuf)
 			p.usableInd = append(p.usableInd, newId)
 			// 注意新加对象直接返回，不入栈，因为已经被“占用”
@@ -65,7 +63,6 @@ func (p *BytesPool) Get() (*ReusableBytes, int32) {
 func (p *BytesPool) Put(id int32) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-
 	if id < 0 || id >= int32(len(p.pool)) {
 		return
 	}
