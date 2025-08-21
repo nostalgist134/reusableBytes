@@ -30,6 +30,9 @@ func NewReusableBytes(size int) *ReusableBytes {
 }
 
 func (rb *ReusableBytes) WriteString(s string) int {
+	if len(s) == 0 {
+		return 0
+	}
 	needed := rb.cursor + len(s)
 	if needed > len(rb.buffer) {
 		newCap := len(rb.buffer) * 2
