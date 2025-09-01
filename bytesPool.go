@@ -14,14 +14,12 @@ type BytesPool struct {
 	initSize  int32
 }
 
-const NewBytesLen = 128
-
 // Init 初始化池，initSize 是初始容量，maxSize 是最大容量
-func (p *BytesPool) Init(initSize, maxSize int32) {
+func (p *BytesPool) Init(initSize, maxSize int32, eachBytesLen int) {
 	p.pool = make([]*ReusableBytes, initSize)
 	p.usableInd = make([]int32, initSize)
 	for i := int32(0); i < initSize; i++ {
-		p.pool[i] = NewReusableBytes(NewBytesLen)
+		p.pool[i] = NewReusableBytes(eachBytesLen)
 		p.usableInd[i] = i
 	}
 	p.available = initSize
@@ -47,7 +45,7 @@ func (p *BytesPool) Get() (*ReusableBytes, int32) {
 		// 可扩容
 		if int32(len(p.pool)) < p.maxSize {
 			newId := int32(len(p.pool))
-			newBuf := NewReusableBytes(NewBytesLen)
+			newBuf := NewReusableBytes(128)
 			p.pool = append(p.pool, newBuf)
 			p.usableInd = append(p.usableInd, newId)
 			// 注意新加对象直接返回，不入栈，因为已经被“占用”
