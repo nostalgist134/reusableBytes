@@ -14,7 +14,7 @@ type BytesPool struct {
 	initSize  int32
 }
 
-// Init 初始化池，initSize 是初始容量，maxSize 是最大容量
+// Init 初始化池，initSize为初始容量，maxSize最大容量，eachBytesLen为每个缓冲区的初始大小
 func (p *BytesPool) Init(initSize, maxSize int32, eachBytesLen int) {
 	p.pool = make([]*ReusableBytes, initSize)
 	p.usableInd = make([]int32, initSize)
