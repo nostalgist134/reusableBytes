@@ -55,6 +55,11 @@ func (rb *ReusableBytes) Len() int {
 	return rb.cursor
 }
 
+// Cap 获取当前缓冲区在不重新分配的情况下的最大长度
+func (rb *ReusableBytes) Cap() int {
+	return len(rb.buffer)
+}
+
 // Reset 重置缓冲区
 func (rb *ReusableBytes) Reset() {
 	rb.cursor = 0
