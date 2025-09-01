@@ -115,3 +115,29 @@ func (rb *ReusableBytes) Grow(n int) {
 	copy(newBuf, rb.buffer[:rb.cursor])
 	rb.buffer = newBuf
 }
+
+// Resize 将缓冲区调整到指定大小
+// - 如果 size 大于当前容量，则重新分配并扩容
+// - 如果 size 小于等于容量，则仅调整 cursor，相当于截断
+func (rb *ReusableBytes) Resize(size int) {
+	if size < 0 {
+		panic("reusablebytes: Resize with negative size")
+	}
+
+	if size > cap(rb.buffer) {
+		newBuf := make([]byte, size)
+		if rb.cursor > 0 {
+			// 保留现有数据
+			copy(newBuf, rb.buffer[:rb.cursor])
+		}
+		rb.buffer = newBuf
+	}
+
+	rb.cursor = size
+	if rb.cursor > len(rb.buffer) {
+		// 防止逻辑长度超过底层切片长度
+		rb.buffer = rb.buffer[:rb.cursor]
+	} else {
+		rb.buffer = rb.buffer[:cap(rb.buffer)]
+	}
+}
