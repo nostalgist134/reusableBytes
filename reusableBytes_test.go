@@ -14,6 +14,8 @@ func TestLazy(t *testing.T) {
 	l2 := rb.LazyFromAnchor()
 	fmt.Println(l.String())
 	fmt.Println(l2.String())
+	fmt.Println(l.Len())
+	fmt.Println(l2.Len())
 }
 
 func TestReusableBytes(t *testing.T) {

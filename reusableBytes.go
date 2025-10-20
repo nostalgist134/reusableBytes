@@ -180,3 +180,7 @@ func (l Lazy) Bytes() []byte {
 	}
 	return l.rb.buffer[l.start:l.end]
 }
+
+func (l Lazy) Len() int {
+	return l.end - l.start
+}
