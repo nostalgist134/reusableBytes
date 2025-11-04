@@ -23,6 +23,7 @@ func TestReusableBytes(t *testing.T) {
 	rb.WriteString("NISHIGIUWOSHIGIUMILAOGIU")
 	rb.Anchor()
 	rb.WriteString("WOSHIGIU")
+	rb.WriteBytes([]byte("MILAOGIU111"))
 	s := rb.StringFromAnchor()
 	fmt.Println(s)
 	fmt.Println(rb.String())

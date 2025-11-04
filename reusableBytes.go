@@ -51,6 +51,25 @@ func (rb *ReusableBytes) WriteString(s string) int {
 	return len(s)
 }
 
+func (rb *ReusableBytes) WriteBytes(p []byte) int {
+	if len(p) == 0 {
+		return 0
+	}
+	needed := rb.cursor + len(p)
+	if needed > len(rb.buffer) {
+		newCap := len(rb.buffer) * 2
+		if newCap < needed {
+			newCap = needed
+		}
+		newBuf := make([]byte, newCap)
+		copy(newBuf, rb.buffer)
+		rb.buffer = newBuf
+	}
+	copy(rb.buffer[rb.cursor:], p)
+	rb.cursor += len(p)
+	return len(p)
+}
+
 // Len 获取当前缓冲区的长度
 func (rb *ReusableBytes) Len() int {
 	return rb.cursor
