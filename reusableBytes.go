@@ -130,24 +130,6 @@ func (rb *ReusableBytes) UnsafeBuffer() unsafe.Pointer {
 	return unsafe.Pointer(&rb.buffer[0])
 }
 
-// Grow 增大底层数组的cap
-func (rb *ReusableBytes) Grow(n int) {
-	if n < 0 {
-		panic("reusablebytes: Grow with negative count")
-	}
-	needed := rb.cursor + n
-	if needed <= cap(rb.buffer) {
-		return
-	}
-	newCap := cap(rb.buffer) * 2
-	if newCap < needed {
-		newCap = needed
-	}
-	newBuf := make([]byte, newCap)
-	copy(newBuf, rb.buffer[:rb.cursor])
-	rb.buffer = newBuf
-}
-
 // Resize 将缓冲区调整到指定大小
 func (rb *ReusableBytes) Resize(size int) {
 	if size < 0 {
@@ -186,7 +168,7 @@ func (rb *ReusableBytes) LazyFromAnchor() Lazy {
 
 // String 将Lazy转为string
 func (l Lazy) String() string {
-	if l.start < 0 || l.end > l.rb.cursor {
+	if l.start < 0 || l.start > l.rb.cursor || l.end > l.rb.cursor || l.start == l.end {
 		return ""
 	}
 	return unsafe.String(&l.rb.buffer[l.start], l.end-l.start)
@@ -194,7 +176,7 @@ func (l Lazy) String() string {
 
 // Bytes 将Lazy转为字节流
 func (l Lazy) Bytes() []byte {
-	if l.start < 0 || l.end > l.rb.cursor {
+	if l.start < 0 || l.start > l.rb.cursor || l.end > l.rb.cursor || l.start == l.end {
 		return []byte{}
 	}
 	return l.rb.buffer[l.start:l.end]
