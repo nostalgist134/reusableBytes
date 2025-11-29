@@ -29,7 +29,7 @@ func (p *BytesPool) Init(initSize, maxSize int32, eachBytesLen int) *BytesPool {
 	return p
 }
 
-// Get 获取一个可用的 ReusableBytes 对象，自动 Reset
+// Get 获取一个可用的ReusableBytes对象与其句柄，归还时需要归还句柄而不是对象本身
 func (p *BytesPool) Get() (*ReusableBytes, int32) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -59,6 +59,8 @@ func (p *BytesPool) Get() (*ReusableBytes, int32) {
 }
 
 // Put 归还 ReusableBytes 对象，传入对象id
+// 注意：这个方法不会做任何安全检查，或者返回任何错误
+// 如要使用此库，请务必确认取/归还的句柄是对应且正确的
 func (p *BytesPool) Put(id int32) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -66,10 +68,7 @@ func (p *BytesPool) Put(id int32) {
 		return
 	}
 
-	// 防止超过栈容量，通常不会超过，做个安全判断
-	if p.available < int32(len(p.usableInd)) {
-		p.usableInd[p.available] = id
-		p.available++
-		p.cond.Signal()
-	}
+	p.usableInd[p.available] = id
+	p.available++
+	p.cond.Signal()
 }

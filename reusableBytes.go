@@ -70,12 +70,12 @@ func (rb *ReusableBytes) WriteBytes(p []byte) int {
 	return len(p)
 }
 
-// Len 获取当前缓冲区的长度
+// Len 获取当前缓冲区的长度（即游标的位置）
 func (rb *ReusableBytes) Len() int {
 	return rb.cursor
 }
 
-// Cap 获取当前缓冲区在不重新分配的情况下的最大长度
+// Cap 获取当前缓冲区在不重新分配的情况下的最大长度（底层切片的cap）
 func (rb *ReusableBytes) Cap() int {
 	return cap(rb.buffer)
 }
@@ -130,7 +130,8 @@ func (rb *ReusableBytes) UnsafeBuffer() unsafe.Pointer {
 	return unsafe.Pointer(&rb.buffer[0])
 }
 
-// Resize 将缓冲区调整到指定大小
+// Resize 调整游标或者缓冲区大小，当调整的size大于底层切片的cap时，切片扩容
+// 否则只调整游标，不重新分配
 func (rb *ReusableBytes) Resize(size int) {
 	if size < 0 {
 		panic("reusablebytes: Resize with negative size")
