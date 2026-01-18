@@ -70,6 +70,10 @@ func (rb *ReusableBytes) WriteBytes(p []byte) int {
 	return len(p)
 }
 
+func (rb *ReusableBytes) Write(p []byte) (n int, err error) {
+	return rb.WriteBytes(p), nil
+}
+
 // Len 获取当前缓冲区的长度（即游标的位置）
 func (rb *ReusableBytes) Len() int {
 	return rb.cursor
